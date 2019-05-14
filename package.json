@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "dev": "nodemon ./index.js",
+    "start": "pm2 start ./index.js --name fetchtb.jishutuan.com --watch"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.2",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.4",
+    "pm2": "^3.5.0",
+    "puppeteer": "^1.16.0"
+  }
+}
