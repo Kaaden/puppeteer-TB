@@ -33,11 +33,31 @@ exports.findTianMao = (html) => {
     const $ = cheerio.load(html);
     //价格
     $(".price").each(function (i, e) {
-        if (e.childNodes.length && e.childNodes[0].data) {
-            objItem.price = e.childNodes[0].data
-            return false
+        if (e.childNodes.length) {
+
+            if (e.childNodes.length === 1) {
+                if (e.childNodes[0].data) {
+                    objItem.price = e.childNodes[0].data
+                    return false
+                }
+            }
+            if (e.childNodes.length === 2) {
+                if (e.childNodes[1].childNodes.length) {
+                    objItem.price = e.childNodes[1].childNodes[0].data
+                    return false
+                }
+            }
+
         }
     });
+    if (!objItem.price) {
+        $(".price-real .num").each(function (i, e) {
+            if (e.childNodes.length && e.childNodes[0].data) {
+                objItem.price = e.childNodes[0].data
+                return false
+            }
+        });
+    }
     // 标题
     $(".share-warp .main").each(function (i, e) {
         if (e.childNodes.length && e.childNodes[0].data) {
@@ -58,6 +78,13 @@ exports.findTianMao = (html) => {
             objItem.content.push(e.attribs["data-ks-lazyload"])
         }
     })
+    if (!objItem.content.length || objItem.content.length <= 2) {
+        $(".module-container  .mui-wpimagetext-item img").each(function (i, e) {
+            if (e.attribs["data-ks-lazyload"]) {
+                objItem.content.push(e.attribs["data-ks-lazyload"])
+            }
+        })
+    }
     return objItem
 }
 
