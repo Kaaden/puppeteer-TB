@@ -70,7 +70,7 @@ exports.findTianMao = (html, url) => {
         }
     })
     if (objItem.title) {
-        objItem.title = trim(objItem.title.replace(/<\/?.+?>/g, ""))
+        objItem.title = trim(objItem.title)
     }
     // 轮播图
     $(".preview-scroller a img").each(function (i, e) {
@@ -129,52 +129,7 @@ exports.resJosn = (vm, res) => {
     });
     res.end(JSON.stringify(vm));
 }
-// 获取规格
-const getSku = (html, goodPage) => {
-    const $ = cheerio.load(html);
-    const value2label = {};
-    $(".J_TSaleProp li").each(function (i, elem) {
-        const value = $(this).attr("data-value");
-        const label = $(this)
-            .find("span")
-            .text();
-        value2label[value] = label;
-    });
-    // 预定义结果 skuList = [{name,skuId,stock},{name,skuId,stock}]
-    const skuList = [];
-    let skuMaps;
-    if (/item.taobao.com/.test(goodPage)) {
-        skuMaps = html.match(/skuMap[\s]+:[\s]+{[\S]+[\s]+,propertyMemoMap/);
-        if (skuMaps) {
-            skuMaps = trim(skuMaps[0]);
-            skuMaps = skuMaps.slice(13, -16);
-            skuMaps = JSON.parse(skuMaps);
-        }
-    }
-    if (/detail.tmall.com/.test(goodPage)) {
-        skuMaps = html.match(/"skuMap":{[\S]+,"salesProp"/);
-        if (skuMaps) {
-            skuMaps = JSON.parse(skuMaps[0].slice(9, -12));
-        }
-    }
-    if (skuMaps) {
-        Object.keys(skuMaps).map(key => {
-            const keyArray = key.split(";");
-            let name = "";
-            keyArray.map(i => {
-                if (value2label[i]) name += value2label[i] + " ";
-            });
-            skuList.push({
-                name,
-                skuId: skuMaps[key].skuId,
-                stock: skuMaps[key].stock,
-                price: skuMaps[key].price,
-            });
-        });
-        return skuList;
-    }
-    return [];
-}
+
 //获取标题
 const getTitle = async (page) => {
     const t1 = ".tpl-wrapper > div > div > div > span"
@@ -193,9 +148,6 @@ const getTitle = async (page) => {
                 title = "";
             }
         }
-    }
-    if (title) {
-        title = title.replace(/<\/?.+?>/g, "")
     }
     return trim(title)
 }
@@ -262,5 +214,59 @@ const urlSize = (imgs, size) => {
 
 //去空格
 const trim = (str) => {
-    return str.replace(/^(\s|\u00A0)+/, "").replace(/(\s|\u00A0)+$/, "");
+    try {
+        str = str.replace(/<\/?.+?>/g, "").replace(/^(\s|\u00A0)+/, "").replace(/(\s|\u00A0)+$/, "")
+    } catch (error) {
+        str = str
+    }
+    return str;
 }
+
+
+
+// 获取规格
+// const getSku = (html, goodPage) => {
+//     const $ = cheerio.load(html);
+//     const value2label = {};
+//     $(".J_TSaleProp li").each(function (i, elem) {
+//         const value = $(this).attr("data-value");
+//         const label = $(this)
+//             .find("span")
+//             .text();
+//         value2label[value] = label;
+//     });
+//     // 预定义结果 skuList = [{name,skuId,stock},{name,skuId,stock}]
+//     const skuList = [];
+//     let skuMaps;
+//     if (/item.taobao.com/.test(goodPage)) {
+//         skuMaps = html.match(/skuMap[\s]+:[\s]+{[\S]+[\s]+,propertyMemoMap/);
+//         if (skuMaps) {
+//             skuMaps = trim(skuMaps[0]);
+//             skuMaps = skuMaps.slice(13, -16);
+//             skuMaps = JSON.parse(skuMaps);
+//         }
+//     }
+//     if (/detail.tmall.com/.test(goodPage)) {
+//         skuMaps = html.match(/"skuMap":{[\S]+,"salesProp"/);
+//         if (skuMaps) {
+//             skuMaps = JSON.parse(skuMaps[0].slice(9, -12));
+//         }
+//     }
+//     if (skuMaps) {
+//         Object.keys(skuMaps).map(key => {
+//             const keyArray = key.split(";");
+//             let name = "";
+//             keyArray.map(i => {
+//                 if (value2label[i]) name += value2label[i] + " ";
+//             });
+//             skuList.push({
+//                 name,
+//                 skuId: skuMaps[key].skuId,
+//                 stock: skuMaps[key].stock,
+//                 price: skuMaps[key].price,
+//             });
+//         });
+//         return skuList;
+//     }
+//     return [];
+// }

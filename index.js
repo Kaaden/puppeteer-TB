@@ -66,7 +66,7 @@ app.post("/fetchtb", urlencodedParser, function (req, res) {
     }
 });
 
-const server = app.listen(8521, function () {
+const server = app.listen(8009, function () {
     const host = server.address().address;
     const port = server.address().port;
     console.log(host)
