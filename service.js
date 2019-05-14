@@ -3,16 +3,18 @@ const cheerio = require("cheerio");
 // 爬取淘宝
 exports.findTaobao = async (page, content, url) => {
     const objItem = {
-        swiperImgs: [],
+        imgs: [],
         title: "",
         price: "",
-        sku: [],
+        // sku: [],
         content: [],
+        good_id: 0,
     }
+    objItem.good_id = getGoodid(url)
     try {
         objItem.title = await getTitle(page)
-        objItem.sku = await getSku(content, url);
-        objItem.swiperImgs = await getSwiper(content)
+        // objItem.sku = await getSku(content, url);
+        objItem.imgs = await getSwiper(content)
         objItem.price = await getPrice(page)
         objItem.content = await getContent(content)
         error = false
@@ -22,14 +24,16 @@ exports.findTaobao = async (page, content, url) => {
     return objItem
 }
 // 爬取天猫h5
-exports.findTianMao = (html) => {
+exports.findTianMao = (html, url) => {
     const objItem = {
-        swiperImgs: [],
+        good_id: 0,
+        imgs: [],
         title: "",
         price: "",
-        sku: [],
+        // sku: [],
         content: [],
     }
+    objItem.good_id = getGoodid(url)
     const $ = cheerio.load(html);
     //价格
     $(".price").each(function (i, e) {
@@ -65,10 +69,13 @@ exports.findTianMao = (html) => {
             return false
         }
     })
+    if (objItem.title) {
+        objItem.title = trim(objItem.title.replace(/<\/?.+?>/g, ""))
+    }
     // 轮播图
     $(".preview-scroller a img").each(function (i, e) {
         if (e.attribs["data-src"]) {
-            objItem.swiperImgs.push(e.attribs["data-src"])
+            objItem.imgs.push(e.attribs["data-src"])
         }
     })
 
@@ -84,7 +91,15 @@ exports.findTianMao = (html) => {
                 objItem.content.push(e.attribs["data-ks-lazyload"])
             }
         })
+        if (!objItem.content.length) {
+            $(".group-warp section img").each(function (i, e) {
+                if (e.attribs["data-src"]) {
+                    objItem.content.push(e.attribs["data-src"])
+                }
+            })
+        }
     }
+
     return objItem
 }
 
@@ -95,7 +110,19 @@ exports.changeUrl = (url) => {
     }
     return url
 }
-
+const getGoodid = (url) => {
+    let id = 0
+    url = url.split("&")
+    if (url.length) {
+        for (let i = 0, len = url.length; i < len; i++) {
+            if (url[i].includes("id=")) {
+                let idt = url[i].split("=")
+                id = idt[1]
+            }
+        }
+    }
+    return id
+}
 exports.resJosn = (vm, res) => {
     res.writeHead(200, {
         "Content-Type": "application/json"
@@ -166,6 +193,9 @@ const getTitle = async (page) => {
                 title = "";
             }
         }
+    }
+    if (title) {
+        title = title.replace(/<\/?.+?>/g, "")
     }
     return trim(title)
 }

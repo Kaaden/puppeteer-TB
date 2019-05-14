@@ -23,6 +23,7 @@ app.get("/", function (req, res) {
 app.post("/fetchtb", urlencodedParser, function (req, res) {
     const pageUrl = req.body.url;
     if (pageUrl) {
+
         (async () => {
             const url = service.changeUrl(pageUrl)
             try {
@@ -42,20 +43,19 @@ app.post("/fetchtb", urlencodedParser, function (req, res) {
             const content = await page.content()
             if (url.includes("detail.m.tmall.com")) {
                 try {
-                    objItem = await service.findTianMao(content)
+                    objItem = await service.findTianMao(content,pageUrl)
                     error = false
                 } catch (error) {
                     error = true
                 }
             } else {
                 try {
-                    objItem = await service.findTaobao(page, content, url)
+                    objItem = await service.findTaobao(page, content, pageUrl)
                     error = false
                 } catch (err) {
                     error = true
                 }
             }
-
             const data = {
                 error,
                 data: objItem
