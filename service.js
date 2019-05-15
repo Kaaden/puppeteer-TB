@@ -1,4 +1,3 @@
-// const puppeteer = require('puppeteer');
 const cheerio = require("cheerio");
 // 爬取淘宝
 exports.findTaobao = async (page, content, url) => {
@@ -6,14 +5,12 @@ exports.findTaobao = async (page, content, url) => {
         imgs: [],
         title: "",
         price: "",
-        // sku: [],
         content: [],
         good_id: 0,
     }
     objItem.good_id = getGoodid(url)
     try {
         objItem.title = await getTitle(page)
-        // objItem.sku = await getSku(content, url);
         objItem.imgs = await getSwiper(content)
         objItem.price = await getPrice(page)
         objItem.content = await getContent(content)
@@ -30,7 +27,6 @@ exports.findTianMao = (html, url) => {
         imgs: [],
         title: "",
         price: "",
-        // sku: [],
         content: [],
     }
     objItem.good_id = getGoodid(url)
