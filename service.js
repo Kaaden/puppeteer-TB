@@ -85,21 +85,27 @@ exports.findTianMao = (html, url) => {
             objItem.content.push(e.attribs["data-ks-lazyload"])
         }
     })
-    if (!objItem.content.length || objItem.content.length <= 2) {
-        $(".module-container  .mui-wpimagetext-item img").each(function (i, e) {
-            if (e.attribs["data-ks-lazyload"]) {
-                objItem.content.push(e.attribs["data-ks-lazyload"])
-            }
-        })
-        if (!objItem.content.length) {
-            $(".group-warp section img").each(function (i, e) {
-                if (e.attribs["data-src"]) {
-                    objItem.content.push(e.attribs["data-src"])
-                }
-            })
+    $(".module-container  .mui-wpimagetext-item img").each(function (i, e) {
+        if (e.attribs["data-ks-lazyload"] && checkStr(objItem.content, e.attribs["data-ks-lazyload"], false)) {
+            objItem.content.push(e.attribs["data-ks-lazyload"])
         }
-    }
+    })
+    $(".group-warp section img").each(function (i, e) {
+        if (e.attribs["data-src"] && checkStr(objItem.content, e.attribs["data-src"], false)) {
+            objItem.content.push(e.attribs["data-src"])
+        }
+    })
 
+    $(".container section img").each(function (i, e) {
+        if (e.attribs["data-src"] && checkStr(objItem.content, e.attribs["data-src"], false)) {
+            objItem.content.push(e.attribs["data-src"])
+        }
+    })
+    $(".container section p img").each(function (i, e) {
+        if (e.attribs["data-src"] && checkStr(objItem.content, e.attribs["data-src"], false)) {
+            objItem.content.push(e.attribs["data-src"])
+        }
+    })
     return objItem
 }
 
@@ -110,19 +116,7 @@ exports.changeUrl = (url) => {
     }
     return url
 }
-const getGoodid = (url) => {
-    let id = 0
-    url = url.split("&")
-    if (url.length) {
-        for (let i = 0, len = url.length; i < len; i++) {
-            if (url[i].includes("id=")) {
-                let idt = url[i].split("=")
-                id = idt[1]
-            }
-        }
-    }
-    return id
-}
+
 exports.resJosn = (vm, res) => {
     res.writeHead(200, {
         "Content-Type": "application/json"
@@ -177,20 +171,21 @@ const getPrice = async (page) => {
     }
     return price
 }
-
+// 详情
 const getContent = async (html) => {
     let urls = []
     urls = catchSwiper(".J_DetailSection .content img", html)
     return urls
 }
-
+// 获取图片
 const catchSwiper = (ele, html) => {
     const $ = cheerio.load(html);
     let urls = []
     try {
         $(ele).each(function (i, elem) {
-            if (elem.attribs.src) {
-                urls.push(elem.attribs.src)
+            const src = elem.attribs["data-ks-lazyload"] || elem.attribs.src
+            if (src && checkStr(src, "top_1", false) && checkStr(src, ".gif", false) && checkStr(src, "video", false)) {
+                urls.push(src)
             }
         });
     } catch (err) {
@@ -198,14 +193,44 @@ const catchSwiper = (ele, html) => {
     }
     return urls
 }
+// 获取goodid
+const getGoodid = (url) => {
+    let id = 0
+    url = url.split("&")
+    if (url.length) {
+        for (let i = 0, len = url.length; i < len; i++) {
+            if (checkStr(url[i], "id=", true)) {
+                let idt = url[i].split("=")
+                id = idt[1]
+                return id
+            }
+        }
+    }
+    return id
+}
 
+const checkStr = (str, para, type) => {
+    if (type) {
+        if (str.includes(para)) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        if (!str.includes(para)) {
+            return true
+        } else {
+            return false
+        }
+    }
+}
 
 const urlSize = (imgs, size) => {
     if (!imgs.length) {
         return imgs
     }
     for (let i = 0, len = imgs.length; i < len; i++) {
-        if (imgs[i].includes(size)) {
+        if (checkStr(imgs[i], size, true)) {
             imgs[i] = imgs[i].replace(size, "400x400.jpg")
         }
     }

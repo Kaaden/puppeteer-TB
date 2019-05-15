@@ -43,7 +43,7 @@ app.post("/fetchtb", urlencodedParser, function (req, res) {
             const content = await page.content()
             if (url.includes("detail.m.tmall.com")) {
                 try {
-                    objItem = await service.findTianMao(content,pageUrl)
+                    objItem = await service.findTianMao(content, pageUrl)
                     error = false
                 } catch (error) {
                     error = true
