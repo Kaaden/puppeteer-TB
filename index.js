@@ -11,16 +11,16 @@ let page;
 
 app.use(bodyParser.json());
 //设置允许跨域 以及样式加载ContentType属性指定响应的 HTTP内容类型
-app.all('*', function (req, res, next) {
+app.all('*', (req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'X-Requested-With');
     res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS');
     next();
 });
-app.get("/", function (req, res) {
+app.get("/", (req, res) => {
     res.send('Hello World!')
 })
-app.post("/fetchtb", urlencodedParser, function (req, res) {
+app.post("/fetchtb", urlencodedParser, (req, res) => {
     const pageUrl = req.body.url;
     if (pageUrl) {
 
@@ -66,9 +66,8 @@ app.post("/fetchtb", urlencodedParser, function (req, res) {
     }
 });
 
-const server = app.listen(8009, function () {
+const server = app.listen(8009, () => {
     const host = server.address().address;
     const port = server.address().port;
-    console.log(host)
     console.log('success', host, port);
 });
